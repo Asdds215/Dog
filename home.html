@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام عمارة بن عقلان</title>
+    <style>
+        body {
+            font-family: Arial;
+            direction: rtl;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+        form {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        h4 {
+            margin: 8px 0;
+            color: #333;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- نموذج اختيار العملية -->
+    <form method="post">
+        <label>اختر العملية التي تريد تنفيذها:</label>
+        <select name="action">
+            <option value="add_apartment">1 - إضافة مستأجر والشقة</option>
+            <option value="recording_the_meter_reading">2 - تسجيل قراءة عداد الماء</option>
+            <option value="invoice_account">3 - حساب الفاتورة</option>
+            <option value="payment_registration">4 - تسديد الفاتورة</option>
+            <option value="apartment_statement">5 - كشف بيانات الشقة</option>
+        </select>
+        <button type="submit">أضغط هنا</button>
+    </form>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <!-- نموذج إضافة شقة -->
+    {% if form_to_show == 'add_apartment' %}
+    <form method="post">
+        <input type="hidden" name="action" value="add_apartment">
+        <label>رقم الشقة:</label>
+        <input type="number" name="apartment_id" value="{{ apartment_id }}" required>
+        <label>اسم المستأجر:</label>
+        <input type="text" name="tenant_name" value="{{ tenant_name }}" required>
+        <label>رقم العداد:</label>
+        <input type="text" name="meter_number" value="{{ meter_number }}" required>
+        <button type="submit">إضافة</button>
+    </form>
+    {% elif form_to_show == 'recording_the_meter_reading' %}
+    <form method="post">
+        <input type="hidden" name="action" value="recording_the_meter_reading">
+        <label>رقم الشقة:</label>
+        <input type="number" name="apartment_id" value="{{ apartment_id }}" required>
+        <label>القراءة السابقة:</label>
+        <input type="number" name="previous_reading" value="{{ previous_reading }}" required>
+        <label>القراءة الحالية:</label>
+        <input type="number" name="current_reading" value="{{ current_reading }}" required>
+        <label>التاريخ:</label>
+        <input type="date" name="reading_date" value="{{ reading_date }}" required>
+        <button type="submit">تسجيل</button>
+    </form>
+    {% elif form_to_show == 'invoice_account' %}
+    <form method="post">
+        <input type="hidden" name="action" value="invoice_account">
+        <label>رقم الشقة:</label>
+        <input type="number" name="apartment_id" value="{{ apartment_id }}" required>
+        <label>سعر الوحدة:</label>
+        <input type="number" name="unit_price" value="{{ unit_price }}" step="0.01" required>
+        <label>رسوم الدرج:</label>
+        <input type="number" name="stairs_fee" value="{{ stairs_fee }}" step="0.01" required>
+        <label>رسوم الكهرباء:</label>
+        <input type="number" name="electricity_fee" value="{{ electricity_fee }}" step="0.01" required>
+        <label>الشهر:</label>
+        <input type="month" name="month" value="{{ month }}" required>
+        {% if total_amount %}
+        <label>الإجمالي: {{ total_amount }}</label>
+        {% endif %}
+        <button type="submit">احسب</button>
+    </form>
+    {% elif form_to_show == 'payment_registration' %}
+    <form method="post">
+        <input type="hidden" name="action" value="payment_registration">
+        <label>رقم الشقة:</label>
+        <input type="number" name="apartment_id" value="{{ apartment_id }}" required>
+        <label>المبلغ المدفوع للكهرباء:</label>
+        <input type="number" name="electricity_paid" value="{{ electricity_paid }}" step="0.01">
+        <label>المبلغ المدفوع للماء:</label>
+        <input type="number" name="water_paid" value="{{ water_paid }}" step="0.01">
+        <button type="submit">تسجيل الدفع</button>
+    </form>
+    {% elif form_to_show == 'apartment_statement' %}
+    <form method="post">
+        <input type="hidden" name="action" value="apartment_statement">
+        <label>رقم الشقة:</label>
+        <input type="number" name="apartment_id" value="{{ apartment_id }}" required>
+        <button type="submit">عرض البيانات</button>
+    </form>
+
+    {% if meter %}
+        {% for reading in meter %}
+        <h4>القراءة الحالية: {{ reading[0] }} | التاريخ: {{ reading[1] }}</h4>
+        {% endfor %}
+    {% else %}
+        <h4>لا توجد قراءات حالياً</h4>
+    {% endif %}
+
+    {% if bill %}
+        {% for item in bill %}
+        <h4>قيمة الفاتورة: {{ item[0] }} ريال | الشهر: {{ item[1] }}</h4>
+        {% endfor %}
+    {% else %}
+        <h4>لا توجد فواتير</h4>
+    {% endif %}
+
+    {% if pay %}
+        {% for payment in pay %}
+        <h4>مدفوع كهرباء: {{ payment[0] }} | مدفوع ماء: {{ payment[1] }}</h4>
+        {% endfor %}
+    {% else %}
+        <h4>لا توجد مدفوعات</h4>
+    {% endif %}
+    {% endif %}
+
+</body>
+</html>
